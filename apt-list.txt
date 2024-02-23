@@ -1,0 +1,15 @@
+autoconf
+ca-certificates
+bison
+build-essential
+curl 
+file
+git
+gnupg
+openjdk-8-jdk
+procps
+python3-pip
+qbittorrent
+vim
+xclip
+zfsutils-linux

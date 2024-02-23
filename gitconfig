@@ -1,0 +1,26 @@
+[user]
+	email = pdmahon1@gmail.com
+	name = Peter Daniel Mahon
+[color]
+	branch = auto
+	diff = auto
+	interactive = auto
+	status = auto
+	ui = auto
+[core]
+	autocrlf = input
+	editor = code --wait
+	excludesfile = /home/peter/.gitignore_global
+[diff]
+	colorMoved = zebra
+[fetch]
+	prune = true
+	fsckobjects = true
+[help]
+	autocorrect = 50
+[init]
+	defaultBranch = main
+[pull]
+	rebase = true
+[transfer]
+	fsckobjects = true

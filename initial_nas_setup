@@ -1,0 +1,209 @@
+#==============================================
+# INITIAL SETUP
+#==============================================
+cd ~
+
+mkdir ~/codebase
+mkdir ~/codebase/RESOURCES
+mkdir ~/codebase/RESOURCES/coursier
+
+sudo apt update
+sudo apt upgrade -y
+sudo apt-get update
+sudo apt-get upgrade -y
+sudo apt install ./apt-list.txt
+
+# For Ubuntu One users
+snap login "pdmahon1@gmail.com"
+
+#==============================================
+# ALIASES
+#==============================================
+alias pbcopy=’xsel — clipboard — input’
+alias pbpaste=’xsel — clipboard — output’
+
+
+#==============================================
+# GIT AND GITLAB
+#==============================================
+
+#verify git config values with `git config -l`
+
+# generate SSH keys for Gitlab - https://docs.gitlab.com/ee/user/ssh.html
+# put result of xclip into Gitlab's "Add SSH Key" page
+ssh-keygen -t ed25519 -C "pdmahon1@gmail.com"
+xclip -sel clip < ~/.ssh/id_ed25519.pub # Linux
+# cat ~/.ssh/id_ed25519.pub | pbcopy # macOS
+
+
+
+#==============================================
+# HOMEBREW
+#==============================================
+
+# install Homebrew per https://brew.sh/
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.profile
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+# save Brewfile from Gitlab dotfiles to ~/
+brew tap Homebrew/bundle
+cd ~; brew bundle
+
+
+
+#==============================================
+# RUST
+#==============================================
+
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+# if ~/.cargo/bin is not in PATH, add it
+if( $(echo $PATH | grep ~/.cargo/bin > /dev/null && echo $?) -neq 0 ); then
+  PATH=$PATH:~/.cargo/bin
+fi
+
+
+# Bash
+rustup completions bash > ~/.local/share/bash-completion/completions/rustup
+
+# Bash (macOS/Homebrew)
+# rustup completions bash > $(brew --prefix)/etc/bash_completion.d/rustup.bash-completion
+
+# Zsh
+#echo "fpath+=~/.zfunc" >> ~/.zshrc
+#rustup completions zsh > ~/.zfunc/_rustup
+
+
+#==============================================
+# RUBY
+#==============================================
+
+# install Ruby through Rbenv 
+# ref: https://github.com/rbenv/rbenv
+rbenv init  #close and restart the terminal after this
+curl -fsSL https://github.com/rbenv/rbenv-installer/raw/main/bin/rbenv-doctor | bash
+
+# list latest stable versions and replace <version> with the latest
+rbenv install -l
+rbenv install <version>
+
+
+
+#==============================================
+# RAIDZ2
+#==============================================
+sudo apt update; sudo apt upgrade
+sudo apt install zfsutils-linux
+
+# verify the existence and locations of hard drives
+sudo fdisk -l
+
+# create the pool
+sudo zpool create ALEXANDRIA raidz2 \
+    /dev/disk/by-id/ata-WDC_WD80EMZZ-11B4FB0_WD-CA04GMWG \
+    /dev/disk/by-id/ata-WDC_WD80EMZZ-11B4FB0_WD-CA067UUK \
+    /dev/disk/by-id/ata-WDC_WD80EMZZ-11B4FB0_WD-CA0LTBTK \
+    /dev/disk/by-id/ata-WDC_WD80EMZZ-11B4FB0_WD-CA0MHPWK \
+    /dev/disk/by-id/ata-WDC_WD80EZAZ-11TDBA0_1EKDJH0Z \
+    /dev/disk/by-id/ata-WDC_WD80EZAZ-11TDBA0_2SGJX38J
+sudo zpool status
+
+
+# encrypt the pool
+sudo zfs create -o encryption=on -o keylocation=prompt -o keyformat=passphrase ALEXANDRIA/encrypted
+
+# set up auto snapshots - https://github.com/zfsonlinux/zfs-auto-snapshot
+wget https://github.com/zfsonlinux/zfs-auto-snapshot/archive/upstream/1.2.4.tar.gz
+tar -xzf 1.2.4.tar.gz
+cd zfs-auto-snapshot-upstream-1.2.4
+make install
+
+
+
+#==============================================
+# INSTALL ADDITIONAL TOOLS
+#==============================================
+sudo snap install code --classic
+
+# Node Version Manager (nvm) and Node
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
+nvm install --lts
+nvm use --lts
+
+# Scala + sbt
+# On x86-64 (aka AMD64)
+cd ~/codebase/RESOURCES/coursier
+curl -fL "https://github.com/coursier/launchers/raw/master/cs-x86_64-pc-linux.gz" | gzip -d > ~/codebase/RESOURCES/coursier/cs
+chmod +x ~/codebase/RESOURCES/coursier/cs
+./cs setup --yes
+sbt --script-version
+scala -version
+
+
+# rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# with Python 3 installed, install the Package Installer for Python (PIP)
+sudo apt-get install python3-pip
+
+
+
+#==============================================
+# DOCKER
+#==============================================
+# From: https://docs.docker.com/engine/install/ubuntu/
+sudo apt-get update
+sudo apt-get install ca-certificates curl gnupg
+
+#Add Docker’s official GPG key
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+#Use the following command to set up the repository
+echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+
+
+# Manage Docker as non-root user
+# REF: https://docs.docker.com/engine/install/linux-postinstall/
+sudo groupadd docker
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Configure Docker to start on system start
+sudo systemctl enable docker.service
+sudo systemctl enable containerd.service
+
+
+#stop using sudo. From: https://docs.docker.com/engine/install/linux-postinstall/
+sudo groupadd docker
+sudo usermod -aG docker $USER
+newgrp docker
+docker run hello-world #test that it works
+
+# jellyfin - REF: https://jellyfin.org/downloads/docker
+docker pull jellyfin/jellyfin:latest
+mkdir -p /srv/jellyfin/{config,cache}
+docker run -d -v /srv/jellyfin/config:/config -v /srv/jellyfin/cache:/cache -v /media:/media --net=host jellyfin/jellyfin:latest
+
+
+
+
+
+
+#==============================================
+# EXPORTS
+#==============================================
+export CPPFLAGS=$CPPFLAGS:"-I/usr/local/opt/openjdk/include"
+export PATH=$PATH:./
+export PATH=$PATH:/usr/local/opt/openjdk/bin
+export PATH=$PATH:~/.rbenv/shims
+export PATH=$PATH:~/.rbenv/completions/rbenv.bash
+export PATH=$PATH:~/.rbenv/completions/rbenv.zsh
