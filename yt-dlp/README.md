@@ -28,7 +28,7 @@ NOTE: For the following relative locations below, assume the present directory i
 
 - So far, I have only needed to download a series explicitly labeled as "Dubs" from Crunchyroll  (e.g., Attack on Titan vs Attack on Titan (Dubs)). 
 This config file has a means of sorting out videos that don't contain ([Eng[lish] ]Dub[s]) in the title using regex. 
-The laymans terms means this filters out videos that don't contain (Dub) or (Dubs) in paranetheses with (Eng ...) or (English ...) as optional prefixes. 
+The laymans terms means this filters out videos that don't contain (Dub) or (Dubs) in parenetheses with (Eng ...) or (English ...) as optional prefixes. 
 Any word besides English and any word that isn't specifically Dub or Dubs will be considered invalid and will not pass the regex matching. As a result, it won't be downloaded.
 
 Some passing examples:
