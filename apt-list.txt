@@ -6,10 +6,13 @@ curl
 file
 git
 gnupg
-openjdk-8-jdk
+openjdk-22-jdk
 procps
 python3-pip
 qbittorrent
 vim
+virtualbox 
+virtualbox-ext-pack 
+virtualbox-qt
 xclip
 zfsutils-linux
