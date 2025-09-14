@@ -193,10 +193,11 @@ docker pull jellyfin/jellyfin:latest
 mkdir -p /srv/jellyfin/{config,cache}
 docker run -d -v /srv/jellyfin/config:/config -v /srv/jellyfin/cache:/cache -v /media:/media --net=host jellyfin/jellyfin:latest
 
-
-
-
-
+# yt-dlp
+# https://github.com/yt-dlp/yt-dlp-wiki/blob/master/Installation.md
+sudo add-apt-repository ppa:tomtomtom/yt-dlp    # Add ppa repo to apt
+sudo apt update                                 # Update package list
+sudo apt install yt-dlp -y                      # Install yt-dlp
 
 #==============================================
 # EXPORTS
